@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -68,7 +68,7 @@ jobs:
 
       # Upload artifacts Windows
       - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         id: upload_artifacts_windows
         with:
           name: PixelFlasher.exe Artifacts
@@ -86,10 +86,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -130,7 +130,7 @@ jobs:
 
       # Upload artifacts Windows 2019
       - name: Upload Windows 2019 Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         id: upload_artifacts_windows_2019
         with:
           name: PixelFlasher_Win_2019.exe Artifacts
@@ -147,7 +147,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         run: |
@@ -196,7 +196,7 @@ jobs:
 
       # Upload artifacts Ubuntu 20.04
       - name: Upload Ubuntu 20.04 Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         id: upload_artifacts_ubuntu_20_04
         with:
           name: PixelFlasher_Ubuntu_20_04 Artifacts
@@ -213,7 +213,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         run: |
@@ -262,7 +262,7 @@ jobs:
 
       # Upload artifacts Ubuntu 22.04
       - name: Upload Ubuntu 22.04 Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         id: upload_artifacts_ubuntu_22_04
         with:
           name: PixelFlasher_Ubuntu_22_04 Artifacts
@@ -273,32 +273,23 @@ jobs:
   # ---------------------------------------------------------------------------
   #                              build_mac_11
   # ---------------------------------------------------------------------------
-  build_mac_11:
+  build_mac_13:
     if: github.actor == 'badabing2005'
     # runs-on: macos-latest
-    runs-on: macos-11
+    runs-on: macos-13
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: List Cellar directory Again
+      - name: List Cellar directory
         run: |
           ls /usr/local/Cellar
 
-      - name: Uninstall Pythons other than 3.11
-        run: |
-          brew uninstall --ignore-dependencies python@3.10
-          brew uninstall --ignore-dependencies python@3.12
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Install wxPython
-        # run: brew install wxpython
-        run: pip install wxPython
+          python-version: '3.12'
 
       - name: Install node graphicsmagick imagemagick
         run: brew install node graphicsmagick imagemagick
@@ -306,11 +297,20 @@ jobs:
       - name: Install create-dmg
         run: npm install --global create-dmg
 
-      - name: Add Python 3.11 to PATH
-        run: export PATH=/usr/local/Cellar/python@3.11/bin:$PATH
+      # - name: Uninstall Pythons other than 3.11
+      #   run: |
+      #     brew uninstall --ignore-dependencies python@3.10
+      #     brew uninstall --ignore-dependencies python@3.12
+
+      - name: Install wxPython
+        # run: brew install wxpython
+        run: pip install wxPython
+
+      - name: Add Python 3.12 to PATH
+        run: export PATH=/usr/local/Cellar/python@3.12/bin:$PATH
 
       - name: Create virtual environment
-        run: python3.11 -m venv myenv
+        run: python3.12 -m venv myenv
         shell: bash
 
       - name: Activate virtual environment
@@ -318,10 +318,10 @@ jobs:
         shell: bash
 
       - name: Install requirements
-        run: python3.11 -m pip install -r requirements.txt
+        run: python3.12 -m pip install -r requirements.txt
 
       - name: List modules and their versions
-        run: python3.11 -m pip freeze
+        run: python3.12 -m pip freeze
 
       - name: Build application
         run: ./build.sh
@@ -335,9 +335,9 @@ jobs:
         run: ls dist
 
       # Upload artifacts Mac-OS
-      - name: Upload Mac-OS 11 Artifact
-        uses: actions/upload-artifact@v3
-        id: upload_artifact_macos_11
+      - name: Upload Mac-OS 13 Artifact
+        uses: actions/upload-artifact@v4
+        id: upload_artifact_macos_13
         with:
           name: PixelFlasher.dmg Artifacts
           path: |
@@ -349,7 +349,7 @@ jobs:
   # ---------------------------------------------------------------------------
   deploy:
     if: github.actor == 'badabing2005'
-    needs: [build_windows, build_windows_2019, build_ubuntu_20_04, build_ubuntu_22_04, build_mac_11]
+    needs: [build_windows, build_windows_2019, build_ubuntu_20_04, build_ubuntu_22_04]
 
     runs-on: ubuntu-latest
 
@@ -367,7 +367,7 @@ jobs:
 
       # Download the Windows artifact from the build_windows job
       - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PixelFlasher.exe Artifacts
           path: release
@@ -375,7 +375,7 @@ jobs:
 
       # Download the Windows-2019 artifact from the build_windows_2019 job
       - name: Download Windows-2019 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PixelFlasher_Win_2019.exe Artifacts
           path: release
@@ -383,7 +383,7 @@ jobs:
 
       # Download the Ubuntu_20_04 artifact from the build_ubuntu_20_04 job
       - name: Download Ubuntu_20_04 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PixelFlasher_Ubuntu_20_04 Artifacts
           path: release
@@ -391,15 +391,15 @@ jobs:
 
       # Download the Ubuntu_22_04 artifact from the build_ubuntu_22_04 job
       - name: Download Ubuntu_22_04 Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PixelFlasher_Ubuntu_22_04 Artifacts
           path: release
         continue-on-error: true
 
-      # Download the Mac-OS artifacts from the build_mac_11 job
+      # Download the Mac-OS artifacts from the build_mac_13 job
       - name: Download Mac-OS Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: PixelFlasher.dmg Artifacts
           path: release
@@ -411,7 +411,8 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        # uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@4634c16e79c963813287e889244c50009e7f0981
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ steps.get_version.outputs.version }}
